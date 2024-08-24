@@ -28,6 +28,7 @@ body {
   margin-top: 20px;
   align-items: center;
   justify-content: center;
+  scroll-behavior: smooth;
 }
 
 /* width */
@@ -39,16 +40,16 @@ body {
 ::-webkit-scrollbar-track {
   background: black;
 }
- 
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: white; 
+  background: white;
   border-radius: 4px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: lightgray; 
+  background: lightgray;
 }
 
 .subtitle {
@@ -81,4 +82,11 @@ button, #settingsIcon {
   bottom: 20px;
   right: 20px;
   font-size: xx-large;
+}
+
+#timestamp {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  font-size: medium;
 }
