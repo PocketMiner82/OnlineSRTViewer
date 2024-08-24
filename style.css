@@ -21,17 +21,34 @@ body {
 }
 
 #subtitlesContainer {
-  width: 80%;
+  width: 100vw;
+  max-height: 82%;
   overflow-y: auto;
-  margin-bottom: 10%;
-  margin-top: 5%;
-  scrollbar-width: none; /* For Firefox */
+  margin-bottom: 45px;
+  margin-top: 30px;
   align-items: center;
   justify-content: center;
 }
 
-#subtitlesContainer::-webkit-scrollbar {
-  display: none; /* For Chrome, Safari, and Opera */
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: black;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: white; 
+  border-radius: 4px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: lightgray; 
 }
 
 .subtitle {
