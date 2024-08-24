@@ -22,10 +22,10 @@ body {
 
 #subtitlesContainer {
   width: 100vw;
-  max-height: 82%;
+  max-height: 80%;
   overflow-y: auto;
   margin-bottom: 45px;
-  margin-top: 30px;
+  margin-top: 20px;
   align-items: center;
   justify-content: center;
 }
