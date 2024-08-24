@@ -10,16 +10,24 @@ body {
 
 #subtitleFile {
   position: fixed;
-  top: 20px;
+  top: 15px;
   left: 50%;
   transform: translateX(-50%);
+  background: #333;
+  border: 1px solid #fff;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #fff;
+  font-size: small;
+  max-width: auto;
 }
 
 #subtitlesContainer {
   position: fixed;
   max-height: 100%;
   overflow-y: scroll;
-  top: 60px;
+  top: 65px;
   bottom: 70px;
   align-items: center;
   justify-content: center;
