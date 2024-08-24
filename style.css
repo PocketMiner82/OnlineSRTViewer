@@ -24,7 +24,8 @@ body {
   width: 80%;
   max-height: 80vh;
   overflow-y: auto;
-  margin-bottom: 20px;
+  margin-bottom: 50px;
+  margin-top: 30px;
   scrollbar-width: none; /* For Firefox */
   align-items: center;
   justify-content: center;
@@ -38,7 +39,7 @@ body {
   margin-bottom: 30px;
   color: gray;
   text-align: center;
-  font-size: larger;
+  font-size: x-large;
 }
 
 .currentSubtitle {
@@ -56,11 +57,12 @@ button, #settingsIcon {
   transform: translateX(-50%);
   width: 60px;
   height: 30px;
+  font-size: medium;
 }
 
 #settingsIcon {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  font-size: 24px;
+  font-size: xx-large;
 }
