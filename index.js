@@ -185,8 +185,8 @@ function startHighlighting() {
   playPauseButton.textContent = 'Pause';
   lastUpdate = Date.now();
 
-  // Check every 250 milliseconds (4 times per second)
-  timer = setInterval(highlightSubtitles, 250);
+  // Check every 100 milliseconds (10 times per second)
+  timer = setInterval(highlightSubtitles, 100);
 }
 
 /**
@@ -218,18 +218,20 @@ function highlightSubtitles() {
 
     // loop threw all subtitles until we find one that has a start time greater than the total time. then use the index before that.
     let newIndex = -1;
+    let newTime = 0;
     subtitleDivs.forEach(subtitleDiv => {
       const timestamps = subtitleDiv.subtitle.timestamps;
 
-      if (parseTime(timestamps.start) >= totalTime) {
+      if (parseTime(timestamps.start) > totalTime) {
         return;
       } else {
+        newTime = totalTime - parseTime(timestamps.start)
         newIndex++;
       }
     });
 
     if (newIndex > currentSubtitleIndex) {
-      lastUpdate = currentTime;
+      lastUpdate = currentTime - newTime;
       currentSubtitleIndex = newIndex;
       highlightSubtitle(currentSubtitleIndex);
     }
