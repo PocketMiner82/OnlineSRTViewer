@@ -184,6 +184,7 @@ function startHighlighting() {
   isPlaying = true;
   playPauseButton.textContent = 'Pause';
   lastUpdate = Date.now();
+  lockWakeState();
 
   // Check every 100 milliseconds (10 times per second)
   timer = setInterval(highlightSubtitles, 100);
@@ -196,6 +197,8 @@ function pauseHighlighting() {
   const playPauseButton = document.getElementById('playPauseButton');
   isPlaying = false;
   playPauseButton.textContent = 'Play';
+  releaseWakeState();
+
   clearInterval(timer);
 }
 
@@ -289,4 +292,27 @@ function setCookie(name, value, days) {
   let date = new Date();
   date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
   document.cookie = name + "=" + encodeURIComponent(value) + ";expires=" + date.toUTCString() + ";path=/";
+}
+
+
+//
+// WAKELOCK
+//
+
+
+const canWakeLock = () => 'wakeLock' in navigator;
+
+let wakelock;
+async function lockWakeState() {
+  if(!canWakeLock()) return;
+  try {
+    wakelock = await navigator.wakeLock.request();
+  } catch(e) {
+    console.error('Failed to lock wake state with reason:', e.message);
+  }
+}
+
+function releaseWakeState() {
+  if(wakelock) wakelock.release();
+  wakelock = null;
 }
