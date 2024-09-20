@@ -16,6 +16,34 @@ let lastUpdate;
 // The total elapsed time
 let totalTimestamp;
 
+// play and pause icons
+const PLAY_ICON = '<i class="fas fa-play"></i>';
+const PAUSE_ICON = '<i class="fas fa-pause"></i>';
+
+//
+// EVENT LISTNERS
+//
+
+
+// Event listener for subtitle file input change
+document.getElementById('subtitleFile').addEventListener('change', function (e) {
+  window.onbeforeunload = () => "Bist du sicher, dass du die Seite verlassen willst?";
+  // document.getElementById('subtitleFile').style.display = 'none';
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      parseSrt(e.target.result);
+
+      startHighlighting();
+      currentSubtitleIndex = 0;
+      highlightSubtitles(true);
+      pauseHighlighting();
+    };
+    reader.readAsText(file);
+  }
+});
+
 // Event listener for clicking on subtitles to highlight them
 document.addEventListener('click', function (e) {
   if (e.target.classList.contains('subtitle')) {
@@ -29,12 +57,6 @@ document.addEventListener('click', function (e) {
     }
   }
 });
-
-
-//
-// EVENT LISTNERS
-//
-
 
 // Event listener for play/pause button click
 document.getElementById('playPauseButton').addEventListener('click', () => {
@@ -65,24 +87,6 @@ document.getElementById('settingsIcon').addEventListener('click', () => {
     }
     alert("Please enter a valid number.");
   }
-});
-
-// Event listener for subtitle file input change
-document.getElementById('subtitleFile').addEventListener('change', function (e) {
-  window.onbeforeunload = function () {
-    return "Bist du sicher, dass du die Seite verlassen willst?";
-  };
-  // document.getElementById('subtitleFile').style.display = 'none';
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      parseSrt(e.target.result);
-    };
-    reader.readAsText(file);
-  }
-
-  currentSubtitleIndex = 0;
 });
 
 
@@ -116,6 +120,19 @@ function parseTime(timestamp) {
 }
 
 /**
+ * Adds a subtitle to the subtitles array.
+ * @param {Array<Object>} subtitles - The array of parsed subtitles.
+ * @param {Object|null} subtitle - The current subtitle object.
+ * @returns {void}
+ */
+function addSubtitle(subtitles, subtitle) {
+  if (subtitle) {
+    subtitles.push(subtitle);
+    subtitle.text = subtitle.text.trim().replace("\n", "<br>");
+  }
+}
+
+/**
  * Parses the SRT file text to extract subtitles.
  * @param {string} srtText - The raw string from the SRT file.
  */
@@ -123,29 +140,50 @@ function parseSrt(srtText) {
   const lines = srtText.split('\n');
   const subtitles = [];
   let subtitle = null;
-  lines.forEach(line => {
-    line = line.trim();
-    // Sequence identifier
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+
+    // sequence identifier
     if (/^\d+$/.test(line)) {
-      // Push previous subtitle
-      if (subtitle) subtitles.push(subtitle);
-      // Initialize new subtitle with empty text
-      subtitle = { sequence: parseInt(line, 10), text: '' };
-    // Timestamps
-    } else if (line.includes(' --> ')) {
-      let timestamp = line.split(" --> ");
-      subtitle.timestamps = { start: timestamp[0], end: timestamp[1] };
-    // Subtitle text
-    } else if (line.trim()) {
+      // push previous subtitle
+      addSubtitle(subtitles, subtitle);
+      subtitle = null;
+
+      let nextLine = lines[++i].trim();
+
+      // the next line has to be a timestamp
+      if (/^\d+:\d+:\d+,\d+(?: --> \d+:\d+:\d+,\d+)?$/.test(nextLine)) {
+        let timestamps = nextLine.split(" --> ");
+        subtitle = {
+          sequence: parseInt(line, 10),
+          text: '',
+          timestamps: {
+            start: timestamps[0],
+            end: timestamps[1]
+          }
+        };
+      } else {
+        console.warn(`Expected timestamp(s), not '${timestamps}'`);
+
+        // reset the index, maybe a seq id was duplicated
+        i--;
+      }
+    // subtitle text
+    } else if (subtitle && line.trim()) {
       subtitle.text += line.trim() + '\n';
+    } else if (!subtitle) {
+      console.warn(`Expected sequence identifier, not '${line}'`);
     }
-  });
-  // Push last subtitle
-  if (subtitle) subtitles.push(subtitle);
-  // Trim extra spaces from text
-  subtitles.forEach(subtitle => {
-    subtitle.text = subtitle.text.trim().replace("\n", "<br>");
-  });
+  }
+
+  // push last subtitle
+  addSubtitle(subtitles, subtitle);
+  
+  if (subtitles.length == 0) {
+    alert("Failed to parse SRT file. See browser console.");
+  }
+
   displaySubtitles(subtitles);
 }
 
@@ -182,12 +220,12 @@ function displaySubtitles(subtitles) {
 function startHighlighting() {
   const playPauseButton = document.getElementById('playPauseButton');
   isPlaying = true;
-  playPauseButton.textContent = 'Pause';
+  playPauseButton.innerHTML = PAUSE_ICON;
   lastUpdate = Date.now();
   lockWakeState();
 
-  // Check every 100 milliseconds (10 times per second)
-  timer = setInterval(highlightSubtitles, 100);
+  // Check every 50 milliseconds (20 times per second)
+  timer = setInterval(highlightSubtitles, 50);
 }
 
 /**
@@ -196,7 +234,7 @@ function startHighlighting() {
 function pauseHighlighting() {
   const playPauseButton = document.getElementById('playPauseButton');
   isPlaying = false;
-  playPauseButton.textContent = 'Play';
+  playPauseButton.innerHTML = PLAY_ICON;
   releaseWakeState();
 
   clearInterval(timer);
@@ -204,9 +242,10 @@ function pauseHighlighting() {
 
 /**
  * Highlights the current subtitle based on the elapsed time.
+ * @param {boolean} force force scrolling to the current subtitle
  */
-function highlightSubtitles() {
-  if (currentSubtitleIndex == subtitleDivs.length) {
+function highlightSubtitles(force = false) {
+  if (currentSubtitleIndex == subtitleDivs.length - 1) {
     pauseHighlighting();
     return;
   }
@@ -217,7 +256,7 @@ function highlightSubtitles() {
     const elapsedTime = ((currentTime - lastUpdate) / 1000) * parseFloat(this.getCookie("playbackSpeed") || 1);
 
     const currentSubtitleTime = parseTime(subtitleDivs[currentSubtitleIndex].subtitle.timestamps.start);
-    const totalTime = currentSubtitleTime + elapsedTime;
+    let totalTime = currentSubtitleTime + elapsedTime;
 
     // loop threw all subtitles until we find one that has a start time greater than the total time. then use the index before that.
     let newIndex = -1;
@@ -233,10 +272,11 @@ function highlightSubtitles() {
       }
     });
 
-    if (newIndex > currentSubtitleIndex) {
+    if (newIndex > currentSubtitleIndex || force) {
       lastUpdate = currentTime - newTime;
       currentSubtitleIndex = newIndex;
-      highlightSubtitle(currentSubtitleIndex);
+      totalTime = parseTime(subtitleDivs[currentSubtitleIndex].subtitle.timestamps.start);
+      highlightSubtitle(currentSubtitleIndex, force);
     }
 
     // Format and save total timestamp in HH:mm:ss format
@@ -247,17 +287,44 @@ function highlightSubtitles() {
 
 /**
  * Highlights a specific subtitle and updates the current index.
- * @param {number} idx - The index of the subtitle to highlight.
+ * @param {number} idx The index of the subtitle to highlight.
+ * @param {boolean} force force scrolling to the current subtitle
  */
-function highlightSubtitle(idx) {
+function highlightSubtitle(idx, force = false) {
   document.querySelectorAll('.currentSubtitle').forEach(el => el.classList.remove('currentSubtitle'));
   subtitleDivs[idx].div.classList.add('currentSubtitle');
-  subtitleDivs[idx].div.scrollIntoView({
-    behavior: 'auto',
-    block: 'center',
-    inline: 'center'
-  });
   currentSubtitleIndex = idx;
+
+  // check if previous subtitle is visible
+  if (isScrolledIntoView(subtitleDivs[Math.max(0, idx - 1)].div) || force) {
+    // if so, scroll the new one into view
+    subtitleDivs[idx].div.scrollIntoView({
+      behavior: 'auto',
+      block: 'center',
+      inline: 'center'
+    });
+  } else {
+    // show the jump to current subtitle button
+    
+  }
+  
+}
+
+/**
+ * Check if an element is (partly) scrolled into view
+ * @param {Object} el an HTML element
+ * @param {boolean} partly if this should return true when the element is only partly visible
+ * @returns {boolean}
+ */
+function isScrolledIntoView(el, partly = true) {
+  var rect = el.getBoundingClientRect();
+  var elemTop = rect.top;
+  var elemBottom = rect.bottom;
+
+  var isVisible = partly
+      ? elemTop < window.innerHeight && elemBottom >= 0
+      : (elemTop >= 0) && (elemBottom <= window.innerHeight);
+  return isVisible;
 }
 
 
@@ -304,15 +371,21 @@ const canWakeLock = () => 'wakeLock' in navigator;
 
 let wakelock;
 async function lockWakeState() {
-  if(!canWakeLock()) return;
+  if (!canWakeLock()) {
+    return;
+  }
+
   try {
     wakelock = await navigator.wakeLock.request();
-  } catch(e) {
+  } catch (e) {
     console.error('Failed to lock wake state with reason:', e.message);
   }
 }
 
 function releaseWakeState() {
-  if(wakelock) wakelock.release();
+  if (wakelock) {
+    wakelock.release();
+  }
+
   wakelock = null;
 }

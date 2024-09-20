@@ -39,7 +39,7 @@ body {
 
 /* width */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 /* Track */
@@ -50,12 +50,12 @@ body {
 /* Handle */
 ::-webkit-scrollbar-thumb {
   background: white;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: lightgray;
+  background: #AAAAAA;
 }
 
 .subtitle {
@@ -75,24 +75,49 @@ button, #settingsIcon {
 
 #playPauseButton {
   position: fixed;
-  bottom: 20px;
+  bottom: 0px;
   left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 30px;
-  font-size: medium;
+  transform: translateX(-50%) translateY(-50%);
+  height: 35px;
+  font-size: x-large;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background: none;
+  color: #fff;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* Disable blue highlight on mobile */
+}
+
+#playPauseButton:hover {
+  color: #AAAAAA;
 }
 
 #settingsIcon {
   position: fixed;
-  bottom: 20px;
+  bottom: 0px;
   right: 20px;
-  font-size: xx-large;
+  height: 35px;
+  font-size: x-large;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* Disable blue highlight on mobile */
+}
+
+#settingsIcon:hover {
+  color: #AAAAAA;
 }
 
 #timestamp {
   position: fixed;
-  bottom: 20px;
+  bottom: 0px;
   left: 20px;
+  height: 30px;
   font-size: medium;
+  transform: translateY(-50%);
+  text-align: center;
+  display: flex;
+  align-items: center;
 }
