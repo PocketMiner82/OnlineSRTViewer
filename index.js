@@ -33,12 +33,14 @@ document.getElementById('subtitleFile').addEventListener('change', function (e) 
   if (file) {
     const reader = new FileReader();
     reader.onload = function (e) {
-      parseSrt(e.target.result);
-
-      startHighlighting();
       currentSubtitleIndex = 0;
-      highlightSubtitles(true);
-      pauseHighlighting();
+      
+      // parsing successful?
+      if (parseSrt(e.target.result)) {
+        startHighlighting();
+        highlightSubtitles(true);
+        pauseHighlighting();
+      }
     };
     reader.readAsText(file);
   }
@@ -135,6 +137,7 @@ function addSubtitle(subtitles, subtitle) {
 /**
  * Parses the SRT file text to extract subtitles.
  * @param {string} srtText - The raw string from the SRT file.
+ * @returns {boolean} whether the parsing was successful or not
  */
 function parseSrt(srtText) {
   const lines = srtText.split('\n');
@@ -180,11 +183,14 @@ function parseSrt(srtText) {
   // push last subtitle
   addSubtitle(subtitles, subtitle);
   
+  displaySubtitles(subtitles);
+
   if (subtitles.length == 0) {
     alert("Failed to parse SRT file. See browser console.");
+    return false;
   }
 
-  displaySubtitles(subtitles);
+  return true;
 }
 
 /**
