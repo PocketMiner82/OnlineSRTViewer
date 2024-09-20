@@ -246,7 +246,6 @@ function startHighlighting() {
   const playPauseButton = document.getElementById('playPauseButton');
   isPlaying = true;
   playPauseButton.innerHTML = PAUSE_ICON;
-  console.log("!!!!!!!!!!  " + elapsedTimeBeforePause);
   lastUpdate = (Date.now() / 1000) - elapsedTimeBeforePause;
   elapsedTimeBeforePause = 0;
   lockWakeState();
@@ -282,7 +281,6 @@ function highlightSubtitles() {
     const currentTime = Date.now() / 1000;
     // Calculate time elapsed in seconds, also the time is faster by the playbackSpeed factor
     const elapsedTime = (currentTime - lastUpdate) * parseFloat(this.getCookie("playbackSpeed") || 1);
-    console.log(elapsedTime);
 
     const currentSubtitleTime = parseTime(subtitleDivs[currentSubtitleIndex].subtitle.timestamps.start);
     let totalTime = currentSubtitleTime + elapsedTime;
@@ -404,7 +402,7 @@ async function lockWakeState() {
   try {
     wakelock = await navigator.wakeLock.request();
   } catch (e) {
-    console.error('Failed to lock wake state with reason:', e.message);
+    console.warn('Failed to lock wake state with reason:', e.message);
   }
 }
 
