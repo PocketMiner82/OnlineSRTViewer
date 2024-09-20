@@ -13,12 +13,16 @@ let isPlaying = false;
 // Track the start time of playback
 let lastUpdate;
 
+// The elapsed time before pause was pressed
+let elapsedTimeBeforePause = 0;
+
 // The total elapsed time
 let totalTimestamp;
 
 // play and pause icons
 const PLAY_ICON = '<i class="fas fa-play"></i>';
 const PAUSE_ICON = '<i class="fas fa-pause"></i>';
+
 
 //
 // EVENT LISTNERS
@@ -28,7 +32,7 @@ const PAUSE_ICON = '<i class="fas fa-pause"></i>';
 // Event listener for subtitle file input change
 document.getElementById('subtitleFile').addEventListener('change', function (e) {
   window.onbeforeunload = () => "Bist du sicher, dass du die Seite verlassen willst?";
-  // document.getElementById('subtitleFile').style.display = 'none';
+
   const file = e.target.files[0];
   if (file) {
     const reader = new FileReader();
@@ -38,7 +42,8 @@ document.getElementById('subtitleFile').addEventListener('change', function (e) 
       // parsing successful?
       if (parseSrt(e.target.result)) {
         startHighlighting();
-        highlightSubtitles(true);
+        highlightSubtitle(currentSubtitleIndex, true);
+        highlightSubtitles();
         pauseHighlighting();
       }
     };
@@ -54,7 +59,7 @@ document.addEventListener('click', function (e) {
     const clickedIndex = subtitleDivs.findIndex(item => item.div === e.target);
     if (clickedIndex !== -1) {
       highlightSubtitle(clickedIndex);
-      pauseHighlighting();
+      elapsedTimeBeforePause = 0;
       startHighlighting();
     }
   }
@@ -75,7 +80,7 @@ document.getElementById('playPauseButton').addEventListener('click', () => {
 });
 
 // Event listener for settings icon click
-document.getElementById('settingsIcon').addEventListener('click', () => {
+document.getElementById('settingsButton').addEventListener('click', () => {
   let speed = parseFloat(getCookie("playbackSpeed") || 1);
   let newSpeed;
 
@@ -88,6 +93,20 @@ document.getElementById('settingsIcon').addEventListener('click', () => {
       break;
     }
     alert("Please enter a valid number.");
+  }
+});
+
+document.getElementById("scrollToCurrentSubtitle").addEventListener('click', () => {
+  this.highlightSubtitle(currentSubtitleIndex, true);
+});
+
+document.getElementById('subtitlesContainer').addEventListener('scroll', () => {
+  if (isScrolledIntoView(subtitleDivs[currentSubtitleIndex].div)) {
+    // hide the jump to current subtitle button
+    document.getElementById('scrollToCurrentSubtitle').classList.remove('visible');
+  } else {
+    // show the jump to current subtitle button
+    document.getElementById('scrollToCurrentSubtitle').classList.add('visible');
   }
 });
 
@@ -227,10 +246,13 @@ function startHighlighting() {
   const playPauseButton = document.getElementById('playPauseButton');
   isPlaying = true;
   playPauseButton.innerHTML = PAUSE_ICON;
-  lastUpdate = Date.now();
+  console.log("!!!!!!!!!!  " + elapsedTimeBeforePause);
+  lastUpdate = (Date.now() / 1000) - elapsedTimeBeforePause;
+  elapsedTimeBeforePause = 0;
   lockWakeState();
 
   // Check every 50 milliseconds (20 times per second)
+  clearInterval(timer);
   timer = setInterval(highlightSubtitles, 50);
 }
 
@@ -242,29 +264,31 @@ function pauseHighlighting() {
   isPlaying = false;
   playPauseButton.innerHTML = PLAY_ICON;
   releaseWakeState();
+  elapsedTimeBeforePause = ((Date.now() / 1000) - lastUpdate);
 
   clearInterval(timer);
 }
 
 /**
  * Highlights the current subtitle based on the elapsed time.
- * @param {boolean} force force scrolling to the current subtitle
  */
-function highlightSubtitles(force = false) {
+function highlightSubtitles() {
   if (currentSubtitleIndex == subtitleDivs.length - 1) {
     pauseHighlighting();
     return;
   }
 
   if (isPlaying) {
-    const currentTime = Date.now();
-    // Calculate time elapsed in seconds, also the time is faster by the playbackspeed factor
-    const elapsedTime = ((currentTime - lastUpdate) / 1000) * parseFloat(this.getCookie("playbackSpeed") || 1);
+    const currentTime = Date.now() / 1000;
+    // Calculate time elapsed in seconds, also the time is faster by the playbackSpeed factor
+    const elapsedTime = (currentTime - lastUpdate) * parseFloat(this.getCookie("playbackSpeed") || 1);
+    console.log(elapsedTime);
 
     const currentSubtitleTime = parseTime(subtitleDivs[currentSubtitleIndex].subtitle.timestamps.start);
     let totalTime = currentSubtitleTime + elapsedTime;
 
-    // loop threw all subtitles until we find one that has a start time greater than the total time. then use the index before that.
+    // loop threw all subtitles until we find one that has a start time greater than the total time.
+    // then use the index before that.
     let newIndex = -1;
     let newTime = 0;
     subtitleDivs.forEach(subtitleDiv => {
@@ -278,11 +302,11 @@ function highlightSubtitles(force = false) {
       }
     });
 
-    if (newIndex > currentSubtitleIndex || force) {
+    if (newIndex > currentSubtitleIndex) {
       lastUpdate = currentTime - newTime;
       currentSubtitleIndex = newIndex;
       totalTime = parseTime(subtitleDivs[currentSubtitleIndex].subtitle.timestamps.start);
-      highlightSubtitle(currentSubtitleIndex, force);
+      highlightSubtitle(currentSubtitleIndex);
     }
 
     // Format and save total timestamp in HH:mm:ss format
@@ -301,19 +325,15 @@ function highlightSubtitle(idx, force = false) {
   subtitleDivs[idx].div.classList.add('currentSubtitle');
   currentSubtitleIndex = idx;
 
-  // check if previous subtitle is visible
-  if (isScrolledIntoView(subtitleDivs[Math.max(0, idx - 1)].div) || force) {
-    // if so, scroll the new one into view
+  // check if the subtitle is visible
+  if (isScrolledIntoView(subtitleDivs[idx].div) || force) {
+    // scroll the new one into view
     subtitleDivs[idx].div.scrollIntoView({
       behavior: 'auto',
       block: 'center',
       inline: 'center'
     });
-  } else {
-    // show the jump to current subtitle button
-    
   }
-  
 }
 
 /**

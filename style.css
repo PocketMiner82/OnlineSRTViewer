@@ -69,45 +69,36 @@ body {
   color: #fff;
 }
 
-button, #settingsIcon {
+.btn {
+  position: fixed;
+  height: 35px;
+  bottom: 0px;
   cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* Disable blue highlight on mobile */
+  border: none;
+  background: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: x-large;
+}
+
+.btnIcon {
+  color: #fff;
+}
+
+.btnIcon:hover {
+  color: #AAAAAA;
 }
 
 #playPauseButton {
-  position: fixed;
-  bottom: 0px;
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
-  height: 35px;
-  font-size: x-large;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: none;
-  background: none;
-  color: #fff;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* Disable blue highlight on mobile */
 }
 
-#playPauseButton:hover {
-  color: #AAAAAA;
-}
-
-#settingsIcon {
-  position: fixed;
-  bottom: 0px;
+#settingsButton {
   right: 20px;
-  height: 35px;
-  font-size: x-large;
   transform: translateY(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* Disable blue highlight on mobile */
-}
-
-#settingsIcon:hover {
-  color: #AAAAAA;
 }
 
 #timestamp {
@@ -120,4 +111,27 @@ button, #settingsIcon {
   text-align: center;
   display: flex;
   align-items: center;
+}
+
+#scrollToCurrentSubtitle {
+  left: 50%;
+  width: 150px;
+  font-size: large;
+  border-radius: 100px;
+  background: white;
+  color: #000;
+  transition: bottom 0.3s ease-in-out, opacity 0.2s ease-in-out;
+  transform: translateX(-50%) translateY(-50px);
+  opacity: 0;
+  bottom: -100px;
+}
+
+#scrollToCurrentSubtitle:hover {
+  background: #AAAAAA;
+}
+
+#scrollToCurrentSubtitle.visible {
+  opacity: 0.75;
+  bottom: 50px;
+  transition: bottom 0.3s ease-in-out, opacity 0.4s ease-in-out;
 }
