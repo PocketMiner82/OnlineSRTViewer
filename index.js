@@ -61,6 +61,7 @@ document.addEventListener('click', function (e) {
       highlightSubtitle(clickedIndex);
       elapsedTimeBeforePause = 0;
       startHighlighting();
+      document.getElementById('scrollToCurrentSubtitle').classList.remove('visible');
     }
   }
 });
@@ -182,7 +183,7 @@ function parseSrt(srtText) {
           text: '',
           timestamps: {
             start: timestamps[0],
-            end: timestamps[1]
+            end: timestamps.length > 1 ? timestamps[1] : timestamps[0]
           }
         };
       } else {
