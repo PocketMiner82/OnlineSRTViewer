@@ -60,13 +60,14 @@ body {
 
 .subtitle {
   margin-bottom: 30px;
-  color: gray;
+  color: #fff;
   text-align: center;
   font-size: larger;
+  opacity: 0.25;
 }
 
 .currentSubtitle {
-  color: #fff;
+  opacity: 1;
 }
 
 .btn {

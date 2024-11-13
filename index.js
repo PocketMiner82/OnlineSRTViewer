@@ -53,10 +53,11 @@ document.getElementById('subtitleFile').addEventListener('change', function (e) 
 
 // Event listener for clicking on subtitles to highlight them
 document.addEventListener('click', function (e) {
-  if (e.target.classList.contains('subtitle')) {
+  const targetDiv = e.target.closest('div.subtitle');
+  if (targetDiv) {
     document.querySelectorAll('.currentSubtitle').forEach(el => el.classList.remove('currentSubtitle'));
-    e.target.classList.add('currentSubtitle');
-    const clickedIndex = subtitleDivs.findIndex(item => item.div === e.target);
+    targetDiv.classList.add('currentSubtitle');
+    const clickedIndex = subtitleDivs.findIndex(item => item.div === targetDiv);
     if (clickedIndex !== -1) {
       highlightSubtitle(clickedIndex);
       elapsedTimeBeforePause = 0;
@@ -137,7 +138,7 @@ function formatTime(seconds) {
  */
 function parseTime(timestamp) {
   let [hours, minutes, seconds] = timestamp.split(':');
-  seconds = seconds.replace(',', '.');
+  seconds = seconds.replaceAll(',', '.');
   return parseFloat(hours) * 3600 + parseFloat(minutes) * 60 + parseFloat(seconds);
 }
 
@@ -150,7 +151,7 @@ function parseTime(timestamp) {
 function addSubtitle(subtitles, subtitle) {
   if (subtitle) {
     subtitles.push(subtitle);
-    subtitle.text = subtitle.text.trim().replace("\n", "<br>");
+    subtitle.text = subtitle.text.trim().replaceAll("\n", "<br>");
   }
 }
 
