@@ -42,9 +42,9 @@ document.getElementById('subtitleFile').addEventListener('change', function (e) 
       // parsing successful?
       if (parseSrt(e.target.result)) {
         startHighlighting();
-        highlightSubtitle(currentSubtitleIndex, true);
         highlightSubtitles();
         pauseHighlighting();
+        setTimeout(() => highlightSubtitle(currentSubtitleIndex, true), 100);
       }
     };
     reader.readAsText(file);
@@ -59,7 +59,7 @@ document.addEventListener('click', function (e) {
     targetDiv.classList.add('currentSubtitle');
     const clickedIndex = subtitleDivs.findIndex(item => item.div === targetDiv);
     if (clickedIndex !== -1) {
-      highlightSubtitle(clickedIndex);
+      highlightSubtitle(clickedIndex, true);
       elapsedTimeBeforePause = 0;
       startHighlighting();
       document.getElementById('scrollToCurrentSubtitle').classList.remove('visible');
@@ -102,7 +102,7 @@ document.getElementById("scrollToCurrentSubtitle").addEventListener('click', () 
   this.highlightSubtitle(currentSubtitleIndex, true);
 });
 
-document.getElementById('subtitlesContainer').addEventListener('scroll', () => {
+setInterval(() => {
   if (isScrolledIntoView(subtitleDivs[currentSubtitleIndex].div)) {
     // hide the jump to current subtitle button
     document.getElementById('scrollToCurrentSubtitle').classList.remove('visible');
@@ -110,7 +110,9 @@ document.getElementById('subtitlesContainer').addEventListener('scroll', () => {
     // show the jump to current subtitle button
     document.getElementById('scrollToCurrentSubtitle').classList.add('visible');
   }
-});
+}, 100);
+
+
 
 
 //
